@@ -1,0 +1,17 @@
+name: mlflow-churn
+channels:
+  - defaults
+  - conda-forge
+dependencies:
+  - python=3.12.7
+  - pip
+  - pip:
+    - mlflow==2.19.0
+    - xgboost
+    - scikit-learn
+    - scikit-optimize
+    - pandas
+    - numpy
+    - matplotlib
+    - shap
+    - imbalanced-learn
