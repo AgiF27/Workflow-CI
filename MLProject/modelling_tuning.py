@@ -48,9 +48,6 @@ def load_preprocessed_data() -> Tuple[pd.DataFrame, pd.Series, pd.DataFrame, pd.
     """Load preprocessed training and test datasets."""
     train = pd.read_csv("train_preprocessed.csv")
     test = pd.read_csv("test_preprocessed.csv")
-    mlflow.log_artifact("train_preprocessed.csv")
-    mlflow.log_artifact("test_preprocessed.csv")
-
     X_train = train.drop(columns=["Churn"])
     y_train = train["Churn"]
     X_test = test.drop(columns=["Churn"])
