@@ -3,6 +3,7 @@ Telecom churn prediction model training with XGBoost and Bayesian hyperparameter
 Logs metrics and artifacts using MLflow for CI/CD integration.
 """
 
+import os
 import warnings
 from typing import Tuple
 
@@ -11,6 +12,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import mlflow
 import shap
+import tempfile
 
 from xgboost import XGBClassifier
 from sklearn.metrics import (
@@ -46,6 +48,8 @@ def load_preprocessed_data() -> Tuple[pd.DataFrame, pd.Series, pd.DataFrame, pd.
     """Load preprocessed training and test datasets."""
     train = pd.read_csv("train_preprocessed.csv")
     test = pd.read_csv("test_preprocessed.csv")
+    mlflow.log_artifact("train_preprocessed.csv")
+    mlflow.log_artifact("test_preprocessed.csv")
 
     X_train = train.drop(columns=["Churn"])
     y_train = train["Churn"]
@@ -95,56 +99,57 @@ def log_metrics_and_artifacts(model: XGBClassifier, X_test: pd.DataFrame, y_test
         mlflow.log_metric(name, value)
         print(f"{name}: {value:.4f}")
 
-    # Confusion Matrix
-    cm = confusion_matrix(y_test, y_pred)
-    disp = ConfusionMatrixDisplay(confusion_matrix=cm)
-    disp.plot(cmap=plt.cm.Blues)
-    plt.title("Confusion Matrix")
-    plt.savefig("confusion_matrix.png", bbox_inches="tight")
-    mlflow.log_artifact("confusion_matrix.png")
-    plt.close()
+    with tempfile.TemporaryDirectory() as tmpdir:
+        # Confusion Matrix
+        cm = confusion_matrix(y_test, y_pred)
+        disp = ConfusionMatrixDisplay(confusion_matrix=cm)
+        disp.plot(cmap=plt.cm.Blues)
+        plt.title("Confusion Matrix")
+        cm_path = os.path.join(tmpdir, "confusion_matrix.png")
+        plt.savefig(cm_path, bbox_inches="tight")
+        mlflow.log_artifact(cm_path)
+        plt.close()
 
-    # Feature Importance
-    importance = pd.Series(
-        model.feature_importances_,
-        index=X_test.columns
-    ).sort_values(ascending=False)
+        # Feature Importance
+        importance = pd.Series(
+            model.feature_importances_,
+            index=X_test.columns
+        ).sort_values(ascending=False)
 
-    plt.figure(figsize=(10, 6))
-    importance.head(15).plot(kind="barh")
-    plt.title("Top 15 Feature Importance")
-    plt.xlabel("Importance")
-    plt.tight_layout()
-    plt.savefig("feature_importance.png", bbox_inches="tight")
-    mlflow.log_artifact("feature_importance.png")
-    plt.close()
+        plt.figure(figsize=(10, 6))
+        importance.head(15).plot(kind="barh")
+        plt.title("Top 15 Feature Importance")
+        plt.xlabel("Importance")
+        fi_path = os.path.join(tmpdir, "feature_importance.png")
+        plt.savefig(fi_path, bbox_inches="tight")
+        mlflow.log_artifact(fi_path)
+        plt.close()
 
-    # SHAP Waterfall Plot
-    explainer = shap.TreeExplainer(model)
-    shap_values = explainer.shap_values(X_test)
+        # SHAP Waterfall
+        explainer = shap.TreeExplainer(model)
+        shap_values = explainer.shap_values(X_test)
+        explanation = shap.Explanation(
+            values=shap_values[0],
+            base_values=explainer.expected_value,
+            data=X_test.iloc[0],
+            feature_names=X_test.columns
+        )
+        plt.figure(figsize=(10, 6))
+        shap.waterfall_plot(explanation, max_display=10, show=False)
+        plt.title("SHAP Waterfall (Prediction Sample)")
+        sw_path = os.path.join(tmpdir, "shap_waterfall.png")
+        plt.savefig(sw_path, bbox_inches="tight")
+        mlflow.log_artifact(sw_path)
+        plt.close()
 
-    explanation = shap.Explanation(
-        values=shap_values[0],
-        base_values=explainer.expected_value,
-        data=X_test.iloc[0],
-        feature_names=X_test.columns
-    )
-
-    plt.figure(figsize=(10, 6))
-    shap.waterfall_plot(explanation, max_display=10, show=False)
-    plt.title("SHAP Waterfall (Prediction Sample)")
-    plt.tight_layout()
-    plt.savefig("shap_waterfall.png", bbox_inches="tight")
-    mlflow.log_artifact("shap_waterfall.png")
-    plt.close()
-
-    # Classification Report
-    report = classification_report(
-        y_test, y_pred, target_names=["Tidak Churn", "Churn"]
-    )
-    with open("classification_report.txt", "w") as f:
-        f.write(report)
-    mlflow.log_artifact("classification_report.txt")
+        # Classification Report
+        report = classification_report(
+            y_test, y_pred, target_names=["Tidak Churn", "Churn"]
+        )
+        cr_path = os.path.join(tmpdir, "classification_report.txt")
+        with open(cr_path, "w") as f:
+            f.write(report)
+        mlflow.log_artifact(cr_path)
 
 
 def main() -> None:
@@ -173,6 +178,9 @@ def main() -> None:
         verbose=1,
         random_state=RANDOM_STATE,
     )
+
+    # Resolve MLflow run ID conflict
+    os.environ.pop("MLFLOW_RUN_ID", None)
 
     with mlflow.start_run(run_name=RUN_NAME):
         print("Starting Bayesian optimization...")
