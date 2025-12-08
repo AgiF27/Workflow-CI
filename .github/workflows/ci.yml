@@ -23,15 +23,11 @@ jobs:
           python-version: 3.12.7
           use-only-tar-bz2: true
 
-      - name: Create and activate conda environment
+      - name: Create conda environment and run MLflow
         run: |
           cd MLProject
           conda env create -f conda.yaml
           conda activate mlflow-churn
-
-      - name: Run MLflow Project (Train Model)
-        run: |
-          cd MLProject
           export MLFLOW_TRACKING_URI=file://$(pwd)/mlruns
           mlflow run .
 
