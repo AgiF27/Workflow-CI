@@ -48,7 +48,7 @@ jobs:
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_SUPERHERP }}
-          password: ${{ secrets.DOCKERHUB_SUPERHERP }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build Docker Image
         working-directory: MLProject
