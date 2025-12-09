@@ -103,9 +103,6 @@ def log_metrics_and_artifacts(model: XGBClassifier, X_test: pd.DataFrame, y_test
     plt.savefig("confusion_matrix.png", bbox_inches="tight")
     mlflow.log_artifact("confusion_matrix.png")
     plt.close()
-    plt.savefig("confusion_matrix.png", bbox_inches="tight")
-    mlflow.log_artifact("confusion_matrix.png")
-    plt.close()
 
     # Feature Importance
     importance = pd.Series(

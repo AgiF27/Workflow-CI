@@ -28,14 +28,12 @@ jobs:
           cd MLProject
           conda env create -f conda.yaml
           conda activate mlflow-churn
-          pip install mlflow==2.19.0  # Pastikan mlflow terinstal
 
-      - name: Run MLflow Project
+      - name: Run Training Script Directly
         run: |
           cd MLProject
           conda activate mlflow-churn
-          export MLFLOW_TRACKING_URI=file://$(pwd)/mlruns
-          mlflow run .
+          python modelling_tuning.py
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
@@ -59,9 +57,10 @@ jobs:
       - name: Build Docker Image
         run: |
           cd MLProject
-          conda activate mlflow-churn  # Aktifkan lagi untuk akses mlflow
-          RUN_ID=$(grep -r "run_id" mlruns/0/*/meta.yaml | head -n1 | cut -d':' -f2 | tr -d ' ')
-          mlflow models build-docker -m "runs:/$RUN_ID/model" -n churn-model
+          conda activate mlflow-churn
+          # Salin model dari mlruns ke folder saat ini
+          cp -r mlruns/0/*/artifacts/model ./
+          docker build -t churn-model -f Dockerfile .
 
       - name: Push Docker Image
         run: |
