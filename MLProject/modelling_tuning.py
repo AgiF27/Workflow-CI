@@ -39,7 +39,7 @@ EXPERIMENT_NAME = "telecom-churn"
 
 def initialize_mlflow_tracking() -> None:
     """Initialize MLflow to log runs in the local 'mlruns' directory."""
-    mlflow.set_tracking_uri("file://./mlruns")
+    mlflow.set_tracking_uri("file:./mlruns")
     mlflow.set_experiment(EXPERIMENT_NAME)
 
 

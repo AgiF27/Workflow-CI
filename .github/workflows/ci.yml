@@ -30,7 +30,11 @@ jobs:
           source /usr/share/miniconda/etc/profile.d/conda.sh
           conda activate mlflow-churn
           export MLFLOW_TRACKING_URI=file://$(pwd)/mlruns
+          export MLFLOW_TRACKING_URI=file://$(pwd)/mlruns
+          export MLFLOW_ARTIFACT_URI=$(pwd)/mlruns
+          mkdir -p mlruns
           mlflow run .
+
 
 
       - name: Upload Artifacts (MLflow)
