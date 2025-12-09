@@ -27,9 +27,11 @@ jobs:
         working-directory: MLProject
         run: |
           conda env create -f conda.yaml
-          source activate mlflow-churn
+          source /usr/share/miniconda/etc/profile.d/conda.sh
+          conda activate mlflow-churn
           export MLFLOW_TRACKING_URI=file://$(pwd)/mlruns
           mlflow run .
+
 
       - name: Upload Artifacts (MLflow)
         uses: actions/upload-artifact@v4
@@ -51,7 +53,7 @@ jobs:
         run: |
           RUN_ID=$(grep -r "run_id" mlruns/0/*/meta.yaml | head -n1 | cut -d':' -f2 | tr -d ' ')
           echo "Run ID: $RUN_ID"
-          source activate mlflow-churn
+          conda activate mlflow-churn
           mlflow models build-docker -m "runs:/$RUN_ID/model" -n churn-model
 
       - name: Push Docker Image
