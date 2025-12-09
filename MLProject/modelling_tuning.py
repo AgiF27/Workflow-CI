@@ -37,10 +37,7 @@ EXPERIMENT_NAME = "telecom-churn"
 
 
 def initialize_mlflow_tracking() -> None:
-    """Initialize MLflow tracking to local directory."""
-    tracking_dir = os.path.join(os.getcwd(), "mlruns")
-    os.makedirs(tracking_dir, exist_ok=True)
-    mlflow.set_tracking_uri(f"file://{tracking_dir}")
+    mlflow.set_tracking_uri("./mlruns")
     mlflow.set_experiment(EXPERIMENT_NAME)
 
 
