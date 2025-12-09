@@ -50,16 +50,15 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USENAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build & Push MLflow Docker Container Automatically
+      - name: Build MLflow Docker Image
         working-directory: MLProject
         env:
           MLFLOW_TRACKING_URI: file:./mlruns
-          MLFLOW_ENABLE_SYSTEM_METRICS: "false"
-          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
         run: |
           MODEL_DIR=$(find mlruns -path "*/artifacts/model" | head -1)
-          mlflow models build-and-push-container \
-            -m "$MODEL_DIR" \
-            -n $DOCKERHUB_USERNAME/churn-model:latest \
-            --install-mlflow
+          mlflow models build-docker -m "$MODEL_DIR" -n churn-model
+
+      - name: Tag and Push Docker Image
+        run: |
+          docker tag churn-model ${{ secrets.DOCKERHUB_USERNAME }}/churn-model:latest
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/churn-model:latest
