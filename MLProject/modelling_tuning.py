@@ -38,8 +38,8 @@ EXPERIMENT_NAME = "telecom-churn"
 
 
 def initialize_mlflow_tracking() -> None:
-    tracking_uri = os.getenv("MLFLOW_TRACKING_URI", "file:./mlruns")
-    mlflow.set_tracking_uri(tracking_uri)
+    """Initialize MLflow to log runs locally."""
+    mlflow.set_tracking_uri("file://./mlruns")
     mlflow.set_experiment(EXPERIMENT_NAME)
 
 
@@ -100,6 +100,9 @@ def log_metrics_and_artifacts(model: XGBClassifier, X_test: pd.DataFrame, y_test
     disp = ConfusionMatrixDisplay(confusion_matrix=cm)
     disp.plot(cmap=plt.cm.Blues)
     plt.title("Confusion Matrix")
+    plt.savefig("confusion_matrix.png", bbox_inches="tight")
+    mlflow.log_artifact("confusion_matrix.png")
+    plt.close()
     plt.savefig("confusion_matrix.png", bbox_inches="tight")
     mlflow.log_artifact("confusion_matrix.png")
     plt.close()
