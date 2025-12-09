@@ -19,20 +19,15 @@ jobs:
       - name: Setup Miniconda
         uses: conda-incubator/setup-miniconda@v3
         with:
-          auto-update-conda: true
+          environment-file: MLProject/conda.yaml
+          activate-environment: mlflow-churn
           python-version: 3.12.7
-          use-only-tar-bz2: true
 
-      - name: Create conda environment and install dependencies
+      - name: Run Training with MLflow
+        working-directory: MLProject
+        env:
+          MLFLOW_TRACKING_URI: file:./mlruns
         run: |
-          cd MLProject
-          conda env create -f conda.yaml
-          conda activate mlflow-churn
-
-      - name: Run Training Script Directly
-        run: |
-          cd MLProject
-          conda activate mlflow-churn
           python modelling_tuning.py
 
       - name: Upload Artifacts
@@ -44,8 +39,9 @@ jobs:
             MLProject/feature_importance.png
             MLProject/shap_waterfall.png
             MLProject/classification_report.txt
+            MLProject/mlruns/
 
-      - name: Set up Docker Buildx
+      - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v3
 
       - name: Login to Docker Hub
@@ -55,14 +51,11 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build Docker Image
+        working-directory: MLProject
         run: |
-          cd MLProject
-          conda activate mlflow-churn
-          # Salin model dari mlruns ke folder saat ini
-          cp -r mlruns/0/*/artifacts/model ./
-          docker build -t churn-model -f Dockerfile .
+          MODEL_DIR=$(find mlruns -path "*/artifacts/model" | head -1)
+          cp -r "$MODEL_DIR" ./model
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/churn-model:latest .
 
       - name: Push Docker Image
-        run: |
-          docker tag churn-model ${{ secrets.DOCKERHUB_USERNAME }}/churn-model:latest
-          docker push ${{ secrets.DOCKERHUB_USERNAME }}/churn-model:latest
+        run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/churn-model:latest
