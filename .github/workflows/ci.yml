@@ -50,7 +50,7 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USENAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-            - name: Build & Push MLflow Docker Container Automatically
+      - name: Build & Push MLflow Docker Container Automatically
         working-directory: MLProject
         env:
           MLFLOW_TRACKING_URI: file:./mlruns
