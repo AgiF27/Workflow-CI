@@ -24,16 +24,16 @@ jobs:
           use-only-tar-bz2: true
 
       - name: Create conda environment and run MLflow
-        working-directory: MLProject
         run: |
+          cd MLProject
           conda env create -f conda.yaml
           source /usr/share/miniconda/etc/profile.d/conda.sh
           conda activate mlflow-churn
           export MLFLOW_TRACKING_URI=file://$(pwd)/mlruns
-          export MLFLOW_TRACKING_URI=file://$(pwd)/mlruns
-          export MLFLOW_ARTIFACT_URI=$(pwd)/mlruns
           mkdir -p mlruns
+          mlflow experiments create --experiment-name "telecom-churn"
           mlflow run .
+
 
 
 
@@ -55,7 +55,7 @@ jobs:
       - name: Build Docker Image from MLflow Run
         working-directory: MLProject
         run: |
-          RUN_ID=$(grep -r "run_id" mlruns/0/*/meta.yaml | head -n1 | cut -d':' -f2 | tr -d ' ')
+          RUN_ID=$(ls -td mlruns/0/* | head -1 | xargs -n 1 basename)
           echo "Run ID: $RUN_ID"
           conda activate mlflow-churn
           mlflow models build-docker -m "runs:/$RUN_ID/model" -n churn-model
