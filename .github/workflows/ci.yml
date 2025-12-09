@@ -47,7 +47,7 @@ jobs:
       - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
-          username: ${{ secrets.DOCKERHUB_SUPERHERP }}
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build Docker Image
@@ -55,7 +55,7 @@ jobs:
         run: |
           MODEL_DIR=$(find mlruns -path "*/artifacts/model" | head -1)
           cp -r "$MODEL_DIR" ./model
-          docker build -t ${{ secrets.DOCKERHUB_SUPERHERP }}/churn-model:latest .
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/churn-model:latest .
 
       - name: Push Docker Image
-        run: docker push ${{ secrets.DOCKERHUB_SUPERHERP }}/churn-model:latest
+        run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/churn-model:latest
