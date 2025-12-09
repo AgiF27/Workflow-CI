@@ -34,8 +34,12 @@ jobs:
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: mlflow-artifacts
-          path: MLProject/mlruns/
+          name: model-artifacts
+          path: |
+            MLProject/confusion_matrix.png
+            MLProject/feature_importance.png
+            MLProject/shap_waterfall.png
+            MLProject/classification_report.txt
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
