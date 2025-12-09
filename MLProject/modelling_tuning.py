@@ -29,7 +29,6 @@ from skopt import BayesSearchCV
 from skopt.space import Integer, Real
 
 
-# Global configuration
 RANDOM_STATE = 42
 N_ITER = 25
 CV_SPLITS = 5
@@ -37,9 +36,8 @@ RUN_NAME = "XGBoost_BayesOpt_Churn"
 EXPERIMENT_NAME = "telecom-churn"
 
 
-import os
-
 def initialize_mlflow_tracking() -> None:
+    """Initialize MLflow tracking to local directory."""
     tracking_dir = os.path.join(os.getcwd(), "mlruns")
     os.makedirs(tracking_dir, exist_ok=True)
     mlflow.set_tracking_uri(f"file://{tracking_dir}")
@@ -60,7 +58,7 @@ def load_preprocessed_data() -> Tuple[pd.DataFrame, pd.Series, pd.DataFrame, pd.
 
 
 def define_search_space() -> dict:
-    """Define the hyperparameter search space for Bayesian optimization."""
+    """Define hyperparameter search space for Bayesian optimization."""
     return {
         "n_estimators": Integer(100, 400),
         "max_depth": Integer(3, 8),
@@ -72,7 +70,7 @@ def define_search_space() -> dict:
 
 
 def create_model(scale_pos_weight: float = 1.0) -> XGBClassifier:
-    """Instantiate an XGBoost classifier with class imbalance handling."""
+    """Instantiate XGBoost classifier with class imbalance handling."""
     return XGBClassifier(
         random_state=RANDOM_STATE,
         eval_metric="logloss",
@@ -147,7 +145,7 @@ def log_metrics_and_artifacts(model: XGBClassifier, X_test: pd.DataFrame, y_test
 
 
 def main() -> None:
-    """Execute the full model training and logging pipeline."""
+    """Execute full model training and logging pipeline."""
     print("Initializing MLflow tracking...")
     initialize_mlflow_tracking()
 
@@ -169,7 +167,7 @@ def main() -> None:
         cv=cv,
         scoring="recall",
         n_jobs=-1,
-        verbose=1,
+        verbose=0,
         random_state=RANDOM_STATE,
     )
 

@@ -55,7 +55,7 @@ jobs:
         env:
           MLFLOW_TRACKING_URI: file:./mlruns
         run: |
-          MODEL_DIR=$(find mlruns -path "*/artifacts/model" | head -1)
+          MODEL_DIR=$(find mlruns -path "*/artifacts/model" | head -n1)
           mlflow models build-docker -m "$MODEL_DIR" -n churn-model
 
       - name: Tag and Push Docker Image
