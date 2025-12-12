@@ -30,7 +30,6 @@ CV_SPLITS = 5
 RUN_NAME = "XGBoost_BayesOpt_Churn"
 EXPERIMENT_NAME = "telecom-churn"
 
-
 def initialize_mlflow_tracking() -> None:
     mlflow.set_tracking_uri("./mlruns")
     mlflow.set_experiment(EXPERIMENT_NAME)
@@ -132,7 +131,7 @@ def log_metrics_and_artifacts(model: XGBClassifier, X_test: pd.DataFrame, y_test
         f.write(report)
     mlflow.log_artifact("classification_report.txt")
 
-
+# main
 def main() -> None:
     """Execute full model training and logging pipeline."""
     print("Initializing MLflow tracking...")
@@ -177,7 +176,7 @@ def main() -> None:
             input_example=input_example
         )
 
-        print("Training completed successfully.")
+        print("Training Completed Successfully.")
 
 
 if __name__ == "__main__":
