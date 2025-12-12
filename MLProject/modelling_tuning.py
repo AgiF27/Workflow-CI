@@ -1,8 +1,3 @@
-"""
-Telecom churn prediction model training with XGBoost and Bayesian hyperparameter optimization.
-Logs metrics and artifacts using MLflow for CI/CD integration.
-"""
-
 import os
 import warnings
 from typing import Tuple
