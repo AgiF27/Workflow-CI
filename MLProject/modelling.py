@@ -97,7 +97,6 @@ def log_metrics_and_artifacts(model: XGBClassifier, X_test: pd.DataFrame, y_test
     mlflow.log_artifact("confusion_matrix.png")
     plt.close()
 
-    # Feature Importance
     importance = pd.Series(
         model.feature_importances_,
         index=X_test.columns
@@ -111,7 +110,6 @@ def log_metrics_and_artifacts(model: XGBClassifier, X_test: pd.DataFrame, y_test
     mlflow.log_artifact("feature_importance.png")
     plt.close()
 
-    # SHAP Waterfall
     explainer = shap.TreeExplainer(model)
     shap_values = explainer.shap_values(X_test)
     explanation = shap.Explanation(
@@ -127,7 +125,6 @@ def log_metrics_and_artifacts(model: XGBClassifier, X_test: pd.DataFrame, y_test
     mlflow.log_artifact("shap_waterfall.png")
     plt.close()
 
-    # Classification Report
     report = classification_report(
         y_test, y_pred, target_names=["Tidak Churn", "Churn"]
     )
