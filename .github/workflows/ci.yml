@@ -25,7 +25,7 @@ jobs:
       env:
         MLFLOW_TRACKING_URI: file:./mlruns
       run: |
-        python modelling_tuning.py
+        python modelling.py
 
     - name: Upload MLflow Artifacts
       uses: actions/upload-artifact@v4
