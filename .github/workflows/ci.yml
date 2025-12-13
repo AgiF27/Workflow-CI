@@ -6,59 +6,49 @@ on:
   workflow_dispatch:
 
 jobs:
-  train:
+  train-and-deploy:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        shell: bash -l {0}
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+    - name: Checkout repository
+      uses: actions/checkout@v4
 
-      - name: Setup Miniconda
-        uses: conda-incubator/setup-miniconda@v3
-        with:
-          environment-file: MLProject/conda.yaml
-          activate-environment: mlflow-churn
-          python-version: 3.12.7
+    - name: Setup Miniconda
+      uses: conda-incubator/setup-miniconda@v3
+      with:
+        environment-file: MLProject/conda.yaml
+        activate-environment: mlflow-churn
+        python-version: 3.12
 
-      - name: Run Training with MLflow
-        working-directory: MLProject
-        env:
-          MLFLOW_TRACKING_URI: file:./mlruns
-        run: |
-          python modelling.py
+    - name: Train model with MLflow
+      working-directory: MLProject
+      env:
+        MLFLOW_TRACKING_URI: file:./mlruns
+      run: |
+        python modelling_tuning.py
 
-      - name: Upload Artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: model-artifacts
-          path: |
-            MLProject/confusion_matrix.png
-            MLProject/feature_importance.png
-            MLProject/shap_waterfall.png
-            MLProject/classification_report.txt
-            MLProject/mlruns/
+    - name: Upload MLflow Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: mlflow-artifacts
+        path: MLProject/mlruns
 
-      - name: Setup Docker Buildx
-        uses: docker/setup-buildx-action@v3
+    - name: Login to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Login to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKERHUB_USENAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+    - name: Build Docker Image from MLflow model
+      working-directory: MLProject
+      run: |
+        MODEL_PATH=$(find mlruns -path "*/artifacts/model" | head -1)
+        echo "Model path: $MODEL_PATH"
 
-      - name: Build MLflow Docker Image
-        working-directory: MLProject
-        env:
-          MLFLOW_TRACKING_URI: file:./mlruns
-        run: |
-          MODEL_DIR=$(find mlruns -path "*/artifacts/model" | head -n1)
-          mlflow models build-docker -m "$MODEL_DIR" -n churn-model
+        mlflow models build-docker \
+          -m "$MODEL_PATH" \
+          -n ${{ secrets.DOCKERHUB_USERNAME }}/churn-model:latest
 
-      - name: Tag and Push Docker Image
-        run: |
-          docker tag churn-model ${{ secrets.DOCKERHUB_USENAME }}/churn-model:latest
-          docker push ${{ secrets.DOCKERHUB_USENAME }}/churn-model:latest
+    - name: Push Docker Image
+      run: |
+        docker push ${{ secrets.DOCKERHUB_USERNAME }}/churn-model:latest
