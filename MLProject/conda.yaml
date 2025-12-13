@@ -1,7 +1,4 @@
 name: mlflow-churn
-channels:
-  - defaults
-  - conda-forge
 dependencies:
   - python=3.12.7
   - pip
@@ -14,3 +11,6 @@ dependencies:
     - numpy
     - matplotlib
     - shap
+channels:
+  - defaults
+  - conda-forge

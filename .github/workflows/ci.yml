@@ -9,6 +9,10 @@ jobs:
   train-and-deploy:
     runs-on: ubuntu-latest
 
+    defaults:
+      run:
+        shell: bash -l {0}
+
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
@@ -19,6 +23,13 @@ jobs:
         environment-file: MLProject/conda.yaml
         activate-environment: mlflow-churn
         python-version: 3.12
+        auto-activate-base: false
+
+    - name: Verify environment
+      run: |
+        which python
+        python --version
+        python -c "import pandas, mlflow; print('env OK')"
 
     - name: Train model with MLflow
       working-directory: MLProject
