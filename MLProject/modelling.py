@@ -140,11 +140,8 @@ def main() -> None:
     print("Loading preprocessed data...")
     X_train, y_train, X_test, y_test = load_preprocessed_data()
 
-    pos_weight = (len(y_train) - y_train.sum()) / y_train.sum()
-    print(f"scale_pos_weight = {pos_weight:.2f}")
-
     print("Setting up Bayesian optimization...")
-    model = create_model(scale_pos_weight=pos_weight)
+    model = create_model()
     search_space = define_search_space()
     cv = StratifiedKFold(n_splits=CV_SPLITS, shuffle=True, random_state=RANDOM_STATE)
 
