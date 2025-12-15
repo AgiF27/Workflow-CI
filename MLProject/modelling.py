@@ -22,6 +22,7 @@ from sklearn.metrics import (
 from sklearn.model_selection import StratifiedKFold
 from skopt import BayesSearchCV
 from skopt.space import Integer, Real
+from mlflow.models.signature import infer_signature
 
 
 RANDOM_STATE = 42
@@ -166,13 +167,19 @@ def main() -> None:
         log_metrics_and_artifacts(bayes_search.best_estimator_, X_test, y_test)
 
         input_example = X_train.iloc[0:1]
+
+        # 🔹 INI BAGIAN PALING PENTING
+        signature = infer_signature(X_train, y_train)
+
         mlflow.sklearn.log_model(
             sk_model=bayes_search.best_estimator_,
             artifact_path="model",
-            input_example=input_example
+            input_example=input_example,
+            signature=signature
         )
 
         print("Training Completed Successfully.")
+
 
 
 if __name__ == "__main__":
