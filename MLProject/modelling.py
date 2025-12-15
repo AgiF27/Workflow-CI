@@ -131,7 +131,6 @@ def log_metrics_and_artifacts(model: XGBClassifier, X_test: pd.DataFrame, y_test
         f.write(report)
     mlflow.log_artifact("classification_report.txt")
 
-# main
 def main() -> None:
     """Execute full model training and logging pipeline."""
     print("Initializing MLflow tracking...")
