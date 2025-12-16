@@ -1,0 +1,38 @@
+artifact_path: model
+flavors:
+  python_function:
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.sklearn
+    model_path: model.pkl
+    predict_fn: predict
+    python_version: 3.12.7
+  sklearn:
+    code: null
+    pickled_model: model.pkl
+    serialization_format: cloudpickle
+    sklearn_version: 1.8.0
+mlflow_version: 2.19.0
+model_size_bytes: 845133
+model_uuid: 6451ef5147d845bf8c00a97f39005475
+run_id: 558b61bb9f5d431694291550c0eb23f8
+saved_input_example_info:
+  artifact_path: input_example.json
+  pandas_orient: split
+  serving_input_path: serving_input_example.json
+  type: dataframe
+signature:
+  inputs: '[{"type": "double", "name": "Account length", "required": true}, {"type":
+    "double", "name": "Area code", "required": true}, {"type": "long", "name": "International
+    plan", "required": true}, {"type": "long", "name": "Voice mail plan", "required":
+    true}, {"type": "double", "name": "Number vmail messages", "required": true},
+    {"type": "double", "name": "Customer service calls", "required": true}, {"type":
+    "double", "name": "Total minutes", "required": true}, {"type": "double", "name":
+    "Total calls", "required": true}, {"type": "long", "name": "High CSR calls", "required":
+    true}, {"type": "double", "name": "Call frequency", "required": true}, {"type":
+    "long", "name": "Charge Group", "required": true}, {"type": "long", "name": "Day
+    usage high", "required": true}]'
+  outputs: '[{"type": "long", "name": "Churn", "required": true}]'
+  params: null
+utc_time_created: '2025-12-16 15:30:10.952440'

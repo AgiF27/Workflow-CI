@@ -1,0 +1,15 @@
+artifact_uri: file:///home/runner/work/Workflow-CI/Workflow-CI/MLProject/mlruns/0/c423f79125b04bf58eb424ed9b4a3950/artifacts
+end_time: 1765899014589
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: c423f79125b04bf58eb424ed9b4a3950
+run_name: intrigued-horse-294
+run_uuid: c423f79125b04bf58eb424ed9b4a3950
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1765898931451
+status: 3
+tags: []
+user_id: runner
