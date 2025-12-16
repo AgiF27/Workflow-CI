@@ -28,18 +28,16 @@ jobs:
         env:
           MLFLOW_TRACKING_URI: file:./mlruns
         run: |
-          python modelling.py
+          mlflow run . --no-conda
 
-      - name: Upload Artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: model-artifacts
-          path: |
-            MLProject/confusion_matrix.png
-            MLProject/feature_importance.png
-            MLProject/shap_waterfall.png
-            MLProject/classification_report.txt
-            MLProject/mlruns/
+      - name: Save Model to GitHub
+        run: |
+          cp -r MLProject/mlruns ./mlruns
+          git config --global user.email "action@github.com"
+          git config --global user.name "GitHub Action"
+          git add .
+          git commit -m "Save model artifacts from CI" || echo "No changes to commit"
+          git push
 
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -56,6 +54,10 @@ jobs:
           MLFLOW_TRACKING_URI: file:./mlruns
         run: |
           MODEL_DIR=$(find mlruns -path "*/artifacts/model" | head -n1)
+          if [ -z "$MODEL_DIR" ]; then
+            echo "Model directory not found!"
+            exit 1
+          fi
           mlflow models build-docker -m "$MODEL_DIR" -n churn-model
 
       - name: Tag and Push Docker Image
