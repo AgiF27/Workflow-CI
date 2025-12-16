@@ -23,20 +23,20 @@ jobs:
           activate-environment: mlflow-churn
           python-version: 3.12.7
 
-      - name: Run Training with MLflow
+      - name: Run MLflow Project
         working-directory: MLProject
         env:
           MLFLOW_TRACKING_URI: file:./mlruns
         run: |
           mlflow run .
 
-      - name: Save Model to GitHub
+      - name: Commit and Push Artifacts to GitHub
         run: |
-          cp -r MLProject/mlruns ./mlruns
+          cp -r MLProject/mlruns .
           git config --global user.email "action@github.com"
           git config --global user.name "GitHub Action"
-          git add .
-          git commit -m "Save model artifacts from CI" || echo "No changes to commit"
+          git add mlruns/
+          git commit -m "Save model artifacts from CI"
           git push
 
       - name: Setup Docker Buildx
@@ -48,19 +48,21 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USENAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build MLflow Docker Image
+      - name: Build Docker Image
         working-directory: MLProject
         env:
           MLFLOW_TRACKING_URI: file:./mlruns
         run: |
-          MODEL_DIR=$(find mlruns -path "*/artifacts/model" | head -n1)
+          MODEL_DIR=$(find mlruns -path "*/artifacts/model" -type d | head -n1)
           if [ -z "$MODEL_DIR" ]; then
-            echo "Model directory not found!"
+            echo "Model not found!"
+            ls -la mlruns/
             exit 1
           fi
+          echo "Found model at: $MODEL_DIR"
           mlflow models build-docker -m "$MODEL_DIR" -n churn-model
 
-      - name: Tag and Push Docker Image
+      - name: Push Docker Image to Docker Hub
         run: |
           docker tag churn-model ${{ secrets.DOCKERHUB_USENAME }}/churn-model:latest
           docker push ${{ secrets.DOCKERHUB_USENAME }}/churn-model:latest

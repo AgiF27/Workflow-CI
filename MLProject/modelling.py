@@ -156,6 +156,7 @@ def main() -> None:
         random_state=RANDOM_STATE,
     )
 
+    os.environ.pop("MLFLOW_RUN_ID", None)
     with mlflow.start_run(run_name=RUN_NAME):
         print("Starting Bayesian optimization...")
         bayes_search.fit(X_train, y_train)
@@ -168,7 +169,6 @@ def main() -> None:
 
         input_example = X_train.iloc[0:1]
 
-        # 🔹 INI BAGIAN PALING PENTING
         signature = infer_signature(X_train, y_train)
 
         mlflow.sklearn.log_model(
