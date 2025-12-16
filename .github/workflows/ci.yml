@@ -28,7 +28,7 @@ jobs:
         env:
           MLFLOW_TRACKING_URI: file:./mlruns
         run: |
-          mlflow run . --no-conda
+          mlflow run .
 
       - name: Save Model to GitHub
         run: |
